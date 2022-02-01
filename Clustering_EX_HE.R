@@ -1,3 +1,6 @@
+# Code belonging to paper Time-series clustering based on time-varying Hurst exponents
+# Authors: Alex Babiš, Beáta Stehlíková
+
 library(fGarch)
 library(pracma)
 library(data.table)
@@ -8,9 +11,6 @@ library(reshape2)
 library(ggplot2)
 library(gridExtra)
 library(igraph)
-
-
-#setwd("C:/Users/alexb/Desktop/Teaching/cvicenie6")
 
 ### DATA PREPARATION ###
 # https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html
@@ -37,7 +37,7 @@ str(data)
 
 colSums(is.na(data))
 
-# deleting columns with too much NA
+# deleting columns with NA
 data <- data[ , colSums(is.na(data)) == 0] 
 
 # store datetime 
@@ -68,24 +68,25 @@ for (ind in 1:ncol(data))
 # function using summary(garch_fit)
 pvalues <- function(y)
 {
-  m <- capture.output(summary(y))
-  prvy <- which( m == "Standardised Residuals Tests:") + 2
-  posledny <- which( m %like% "LM Arch Test") 
-  m <- m[prvy:posledny]
-  mm <- strsplit(m, split= " ")
-  mmm <- lapply(mm,function(x){i <- x != ""
+  tests.table <- capture.output(summary(y))
+  first.test <- which( m == "Standardised Residuals Tests:") + 2
+  last.test <- which( m %like% "LM Arch Test") 
+  tests.table <- tests.table[first.test:last.test]
+  tests.table2 <- strsplit(tests.table, split= " ")
+  tests.table3 <- lapply(tests.table2,function(x){i <- x != ""
   a <- x[i]
   a <- a[sum(i)]
   return(a)
   })
-  pvalue <- as.numeric(unlist(mmm))
+  pvalue <- as.numeric(unlist(tests.table3))
   names(pvalue) <- c("normtest","normtest","R10","R15","R20","R^210",
                      "R^215","R^220","archtest")
   return(pvalue)
 }
 
 # function returning model with all tests for residuals above 5% and
-# with the highest BIC
+# with the highest BIC, if none of models have all test for residuals 
+# above 5%, then model only with highest BIC is returned
 AGorder <- function(x)
 {
   # AR order that will be tried
@@ -376,16 +377,16 @@ graph.ts.exchangerate(c(1,3,18,28))
 
 ### CLUSTERING ###
 
-# setting possible number of cluster and determining optimal via sulhouette criterium
+# setting possible number of cluster and determining optimal via silhouette criterium
 number.of.clusters <- function(hc, plot = FALSE){
-  pocet <- 2:5
-  sil_mean <- rep(0, length(pocet))
-  for (i in 1:length(pocet)){
-    cut_hc <- cutree(hc, k = pocet[i]) 
+  cnt <- 2:5
+  sil_mean <- rep(0, length(cnt))
+  for (i in 1:length(cnt)){
+    cut_hc <- cutree(hc, k = cnt[i]) 
     clust1 <- cut_hc
     sil <- silhouette(cut_hc, d)
     sil_mean[i] <- mean(sil[,3])}
-  if(plot) plot(pocet, sil_mean, type = "b")
+  if(plot) plot(cnt, sil_mean, type = "b")
   return(pocet[which.max(sil_mean)])
 }
 
@@ -499,16 +500,16 @@ dev.off()
 
 # computing components of G4 graph 
 com <- components(g4)
-komponenty <- which(com$csize > 1)
-for(i in 1:length(komponenty)){
+com2 <- which(com$csize > 1)
+for(i in 1:length(com2)){
   print(paste("* * * ", i, "* * * "))
-  print(names(which(com$membership==komponenty[i])))
+  print(names(which(com$membership==com2[i])))
 }
 
 # computing components of G3 graph
 com <- components(g3)
-komponenty <- which(com$csize > 1)
-for(i in 1:length(komponenty)){
+com2 <- which(com$csize > 1)
+for(i in 1:length(com2)){
   print(paste("* * * ", i, "* * * "))
-  print(names(which(com$membership==komponenty[i])))
+  print(names(which(com$membership==com2[i])))
 }
