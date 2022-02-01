@@ -1,4 +1,4 @@
-# Code >> Time-series clustering based on time-varying Hurst exponents
+# Code >> Time-series clustering based on time-varying Hurst exponents (paper)
 # Authors >> Alex Babiš, Beáta Stehlíková
 
 library(fGarch)
