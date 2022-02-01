@@ -1,5 +1,5 @@
-# Code belonging to paper Time-series clustering based on time-varying Hurst exponents
-# Authors: Alex Babiš, Beáta Stehlíková
+# Code >> Time-series clustering based on time-varying Hurst exponents
+# Authors >> Alex Babiš, Beáta Stehlíková
 
 library(fGarch)
 library(pracma)
